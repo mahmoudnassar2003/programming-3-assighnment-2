@@ -1,0 +1,120 @@
+import java.sql.;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+public class BankSystemApp extends Application {
+
+    private TableView<Account> tableView;
+    private ObservableList<Account> accountList;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Set up the database connection
+        Connection connection = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            String url = "jdbc:mysql://localhost:3306/bank";
+            String username = "root";
+            String password = "";
+            connection = DriverManager.getConnection(url, username, password);
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Create the model class for the Accounts table
+        AccountModel accountModel = new AccountModel(connection);
+
+        // Create the GUI for the Accounts Management Page
+        tableView = new TableView<>();
+        accountList = FXCollections.observableArrayList();
+        tableView.setItems(accountList);
+
+        TableColumn<Account, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
+        TableColumn<Account, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        TableColumn<Account, Double> balanceColumn = new TableColumn<>("Balance");
+        balanceColumn.setCellValueFactory(cellData -> cellData.getValue().balanceProperty().asObject());
+
+        tableView.getColumns().addAll(idColumn, nameColumn, balanceColumn);
+
+        Button createButton = new Button("Create");
+        Button updateButton = new Button("Update");
+        Button deleteButton = new Button("Delete");
+
+        createButton.setOnAction(e -> showCreateAccountDialog(accountModel));
+        updateButton.setOnAction(e -> {
+            Account selectedAccount = tableView.getSelectionModel().getSelectedItem();
+            if (selectedAccount != null) {
+                showUpdateAccountDialog(accountModel, selectedAccount);
+            }
+        });
+        deleteButton.setOnAction(e -> {
+            Account selectedAccount = tableView.getSelectionModel().getSelectedItem();
+            if (selectedAccount != null) {
+                accountModel.deleteAccount(selectedAccount);
+                accountList.remove(selectedAccount);
+            }
+        });
+
+        HBox buttonBox = new HBox(10, createButton, updateButton, deleteButton);
+        buttonBox.setPadding(new Insets(10));
+
+        BorderPane root = new BorderPane();
+        root.setCenter(tableView);
+        root.setBottom(buttonBox);
+
+        // Load initial data from the database
+        accountList.addAll(accountModel.getAllAccounts());
+
+        Scene scene = new Scene(root, 600, 400);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Bank System");
+        primaryStage.show();
+    }
+
+    private void showCreateAccountDialog(AccountModel accountModel) {
+
+    private void showUpdateAccountDialog(AccountModel accountModel, Account account) {
+    }
+
+    // Define the Account class and its corresponding model class
+
+    public static class Account {
+        private final Integer id;
+        private final String name;
+        private final Double balance;
+
+        public Account(Integer id, String name, Double balance) {
+            this.id = id;
+            this.name = name;
+            this.balance = balance;
+        }
+
+        public Integer getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Double getBalance() {
+            return balance;
+        }
+    }
+
+
+
+
+}

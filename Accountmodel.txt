@@ -1,0 +1,36 @@
+    public static class AccountModel {
+        private final Connection connection;
+
+        public AccountModel(Connection connection) {
+            this.connection = connection;
+        }
+
+        public ObservableList<Account> getAllAccounts() {
+            ObservableList<Account> accounts = FXCollections.observableArrayList();
+            String query = "SELECT * FROM accounts";
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(query)) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    String name = resultSet.getString("name");
+                    Double balance = resultSet.getDouble("balance");
+                    accounts.add(new Account(id, name, balance));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return accounts;
+        }
+
+        public void createAccount(Account account) {
+            // Implement the create operation
+        }
+
+        public void updateAccount(Account account) {
+            // Implement the update operation
+        }
+
+        public void deleteAccount(Account account) {
+            // Implement the delete operation
+        }
+    }
